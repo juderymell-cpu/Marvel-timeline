@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UK Marvel Streaming Checklist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0b0e14;
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .checkbox-custom:checked + .item-content .item-title {
+      text-decoration: line-through;
+      color: #6b7280;
+    }
+    .checkbox-custom:checked + .item-content {
+      opacity: 0.75;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20">
+
+  <!-- Sticky Header & Progress Bar -->
+  <header class="sticky top-0 z-30 bg-[#111622]/95 backdrop-blur-md border-b border-gray-800 shadow-xl">
+    <div class="max-w-4xl mx-auto px-4 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="bg-red-600 text-white text-xs font-black tracking-wider px-2 py-0.5 rounded uppercase">Marvel</span>
+            <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">UK Streaming Checklist</h1>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">Disney+ UK &amp; Netflix UK • Release Order (1979–2026)</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-sm font-bold text-white" id="progress-text">0 / 0 Watched</div>
+            <div class="text-xs text-red-400 font-medium" id="progress-percent">0% Complete</div>
+          </div>
+          <button id="reset-btn" onclick="handleResetClick()" class="text-xs bg-gray-800 hover:bg-red-900/60 text-gray-300 hover:text-red-200 border border-gray-700 px-3 py-1.5 rounded-lg transition">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-800 rounded-full h-2.5 mt-3 overflow-hidden">
+        <div id="progress-bar" class="bg-gradient-to-r from-red-600 to-red-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="mt-4 flex flex-col sm:flex-row gap-2">
+        <div class="relative flex-1">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search movies, series, specials..."
+            class="w-full bg-gray-900 border border-gray-700 text-sm text-white rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:border-red-500"
+          />
+          <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="setFilter('all')" id="filter-all" class="filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition">All</button>
+          <button onclick="setFilter('unwatched')" id="filter-unwatched" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 text-gray-300 hover:bg-gray-700 transition">To Watch</button>
+          <button onclick="setFilter('watched')" id="filter-watched" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 text-gray-300 hover:bg-gray-700 transition">Watched</button>
+          <button onclick="setFilter('netflix')" id="filter-netflix" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 text-gray-300 hover:bg-gray-700 transition">Netflix UK</button>
+          <button onclick="setFilter('mcu')" id="filter-mcu" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 text-gray-300 hover:bg-gray-700 transition">MCU Only</button>
+          <button onclick="setFilter('specials')" id="filter-specials" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 text-gray-300 hover:bg-gray-700 transition">Specials &amp; Docs</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 mt-6 space-y-8" id="checklist-container">
+    <!-- Eras injected by JS -->
+  </main>
+
+  <script>
+    const marvelData = [
+      {
+        era: "The Classic & Animated Era (1979–1999)",
+        items: [
+          { title: "Spider-Woman", meta: "1979 Animated Series", platform: "Disney+ UK" },
+          { title: "Spider-Man", meta: "1981 Animated Series", platform: "Disney+ UK" },
+          { title: "Spider-Man and His Amazing Friends", meta: "1981 Animated Series", platform: "Disney+ UK" },
+          { title: "X-Men: The Animated Series", meta: "1992 Animated Series", platform: "Disney+ UK" },
+          { title: "Iron Man", meta: "1994 Animated Series", platform: "Disney+ UK" },
+          { title: "Fantastic Four", meta: "1994 Animated Series", platform: "Disney+ UK" },
+          { title: "Spider-Man: The Animated Series", meta: "1994 Animated Series", platform: "Disney+ UK" },
+          { title: "The Incredible Hulk", meta: "1996 Animated Series", platform: "Disney+ UK" },
+          { title: "Silver Surfer", meta: "1998 Animated Series", platform: "Disney+ UK" },
+          { title: "Spider-Man Unlimited", meta: "1999 Animated Series", platform: "Disney+ UK" },
+          { title: "The Avengers: United They Stand", meta: "1999 Animated Series", platform: "Disney+ UK" }
+        ]
+      },
+      {
+        era: "The Pre-MCU Blockbuster Era (2000–2007)",
+        items: [
+          { title: "X-Men", meta: "2000 Film", platform: "Disney+ UK" },
+          { title: "X-Men: Evolution", meta: "2000 Animated Series", platform: "Disney+ UK" },
+          { title: "Spider-Man", meta: "2002 Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Daredevil", meta: "2003 Film", platform: "Disney+ UK" },
+          { title: "X2: X-Men United", meta: "2003 Film", platform: "Disney+ UK" },
+          { title: "Spider-Man 2", meta: "2004 Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Elektra", meta: "2005 Film", platform: "Disney+ UK" },
+          { title: "Fantastic Four", meta: "2005 Film", platform: "Disney+ UK" },
+          { title: "X-Men: The Last Stand", meta: "2006 Film", platform: "Disney+ UK" },
+          { title: "Fantastic Four: World's Greatest Heroes", meta: "2006 Animated Series", platform: "Disney+ UK" },
+          { title: "Spider-Man 3", meta: "2007 Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Fantastic Four: Rise of the Silver Surfer", meta: "2007 Film", platform: "Disney+ UK" }
+        ]
+      },
+      {
+        era: "The Infinity Saga & Multiverse Neighbours (2008–2019)",
+        items: [
+          { title: "Iron Man", meta: "2008 MCU Film", platform: "Disney+ UK" },
+          { title: "The Incredible Hulk", meta: "2008 MCU Film", platform: "Disney+ UK" },
+          { title: "Wolverine and the X-Men", meta: "2008 Animated Series", platform: "Disney+ UK" },
+          { title: "Iron Man: Armored Adventures", meta: "2009 Animated Series", platform: "Disney+ UK" },
+          { title: "X-Men Origins: Wolverine", meta: "2009 Film", platform: "Disney+ UK" },
+          { title: "The Super Hero Squad Show", meta: "2009 Animated Series", platform: "Disney+ UK" },
+          { title: "Iron Man 2", meta: "2010 MCU Film", platform: "Disney+ UK" },
+          { title: "The Avengers: Earth's Mightiest Heroes", meta: "2010 Animated Series", platform: "Disney+ UK" },
+          { title: "Thor", meta: "2011 MCU Film", platform: "Disney+ UK" },
+          { title: "X-Men: First Class", meta: "2011 Film", platform: "Disney+ UK" },
+          { title: "Captain America: The First Avenger", meta: "2011 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel One-Shot: The Consultant", meta: "2011 MCU Short", platform: "Disney+ UK" },
+          { title: "Marvel One-Shot: A Funny Thing Happened on the Way to Thor's Hammer", meta: "2011 MCU Short", platform: "Disney+ UK" },
+          { title: "Ultimate Spider-Man", meta: "2012 Animated Series", platform: "Disney+ UK" },
+          { title: "The Avengers", meta: "2012 MCU Film", platform: "Disney+ UK" },
+          { title: "The Amazing Spider-Man", meta: "2012 Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Marvel One-Shot: Item 47", meta: "2012 MCU Short", platform: "Disney+ UK" },
+          { title: "Iron Man 3", meta: "2013 MCU Film", platform: "Disney+ UK" },
+          { title: "Avengers Assemble", meta: "2013 Animated Series", platform: "Disney+ UK" },
+          { title: "The Wolverine", meta: "2013 Film", platform: "Disney+ UK" },
+          { title: "Hulk and the Agents of S.M.A.S.H.", meta: "2013 Animated Series", platform: "Disney+ UK" },
+          { title: "Marvel One-Shot: Agent Carter", meta: "2013 MCU Short", platform: "Disney+ UK" },
+          { title: "Agents of S.H.I.E.L.D.", meta: "2013 Series", platform: "Disney+ UK" },
+          { title: "Thor: The Dark World", meta: "2013 MCU Film", platform: "Disney+ UK" },
+          { title: "LEGO Marvel Super Heroes: Maximum Overload", meta: "2013 Animated Special", platform: "Disney+ UK" },
+          { title: "Marvel’s Iron Man & Hulk: Heroes United", meta: "2013 Animated Special", platform: "Disney+ UK" },
+          { title: "Marvel One-Shot: All Hail the King", meta: "2014 MCU Short", platform: "Disney+ UK" },
+          { title: "Captain America: The Winter Soldier", meta: "2014 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel Studios: Assembling a Universe", meta: "2014 Documentary Special", platform: "Disney+ UK" },
+          { title: "Marvel’s Iron Man & Captain America: Heroes United", meta: "2014 Animated Special", platform: "Disney+ UK" },
+          { title: "The Amazing Spider-Man 2", meta: "2014 Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "X-Men: Days of Future Past", meta: "2014 Film", platform: "Disney+ UK" },
+          { title: "Guardians of the Galaxy", meta: "2014 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel: 75 Years, From Pulp to Pop!", meta: "2014 Documentary Special", platform: "Disney+ UK" },
+          { title: "Agent Carter", meta: "2015 Series", platform: "Disney+ UK" },
+          { title: "Daredevil", meta: "2015 Series", platform: "Disney+ UK" },
+          { title: "Avengers: Age of Ultron", meta: "2015 MCU Film", platform: "Disney+ UK" },
+          { title: "Ant-Man", meta: "2015 MCU Film", platform: "Disney+ UK" },
+          { title: "Fantastic Four", meta: "2015 Film", platform: "Disney+ UK" },
+          { title: "Guardians of the Galaxy", meta: "2015 Animated Series", platform: "Disney+ UK" },
+          { title: "Jessica Jones", meta: "2015 Series", platform: "Disney+ UK" },
+          { title: "Marvel Super Hero Adventures: Frost Fight!", meta: "2015 Animated Special", platform: "Disney+ UK" },
+          { title: "Deadpool", meta: "2016 Film", platform: "Disney+ UK" },
+          { title: "Captain America: Civil War", meta: "2016 MCU Film", platform: "Disney+ UK" },
+          { title: "X-Men: Apocalypse", meta: "2016 Film", platform: "Disney+ UK" },
+          { title: "Luke Cage", meta: "2016 Series", platform: "Disney+ UK" },
+          { title: "Doctor Strange", meta: "2016 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel One-Shot: Team Thor: Part 1 & Part 2", meta: "2016 MCU Shorts", platform: "Disney+ UK" },
+          { title: "Legion", meta: "2017 Series", platform: "Disney+ UK" },
+          { title: "Logan", meta: "2017 Film", platform: "Disney+ UK" },
+          { title: "Iron Fist", meta: "2017 Series", platform: "Disney+ UK" },
+          { title: "Guardians of the Galaxy Vol. 2", meta: "2017 MCU Film", platform: "Disney+ UK" },
+          { title: "Spider-Man: Homecoming", meta: "2017 MCU Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "The Defenders", meta: "2017 Limited Series", platform: "Disney+ UK" },
+          { title: "Marvel's Spider-Man", meta: "2017 Animated Series", platform: "Disney+ UK" },
+          { title: "Inhumans", meta: "2017 Series", platform: "Disney+ UK" },
+          { title: "Marvel Future Avengers", meta: "2017 Animated Series", platform: "Disney+ UK" },
+          { title: "The Gifted", meta: "2017 Series", platform: "Disney+ UK" },
+          { title: "Thor: Ragnarok", meta: "2017 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel Super Hero Adventures", meta: "2017 Animated Shorts", platform: "Disney+ UK" },
+          { title: "The Punisher", meta: "2017 Series", platform: "Disney+ UK" },
+          { title: "Runaways", meta: "2017 Series", platform: "Disney+ UK" },
+          { title: "Black Panther", meta: "2018 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel One-Shot: Team Darryl", meta: "2018 MCU Short", platform: "Disney+ UK" },
+          { title: "Avengers: Infinity War", meta: "2018 MCU Film", platform: "Disney+ UK" },
+          { title: "Deadpool 2", meta: "2018 Film", platform: "Disney+ UK" },
+          { title: "Cloak & Dagger", meta: "2018 Series", platform: "Disney+ UK" },
+          { title: "Ant-Man and the Wasp", meta: "2018 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel Rising: Initiation", meta: "2018 Animated Shorts", platform: "Disney+ UK" },
+          { title: "Marvel Rising: Secret Warriors", meta: "2018 Animated Special", platform: "Disney+ UK" },
+          { title: "Venom", meta: "2018 Sony Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Spider-Man: Into the Spider-Verse", meta: "2018 Animated Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Marvel Rising: Chasing Ghosts", meta: "2019 Animated Special", platform: "Disney+ UK" },
+          { title: "Captain Marvel", meta: "2019 MCU Film", platform: "Disney+ UK" },
+          { title: "Marvel Rising: Heart of Iron", meta: "2019 Animated Special", platform: "Disney+ UK" },
+          { title: "Avengers: Endgame", meta: "2019 MCU Film", platform: "Disney+ UK" },
+          { title: "Dark Phoenix", meta: "2019 Film", platform: "Disney+ UK" },
+          { title: "Spider-Man: Far From Home", meta: "2019 MCU Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Marvel Rising: Battle of the Bands", meta: "2019 Animated Special", platform: "Disney+ UK" },
+          { title: "Marvel Rising: Operation Shuri", meta: "2019 Animated Special", platform: "Disney+ UK" },
+          { title: "Marvel’s Hero Project", meta: "2019 Documentary Series", platform: "Disney+ UK" },
+          { title: "Marvel Rising: Playing with Fire", meta: "2019 Animated Special", platform: "Disney+ UK" }
+        ]
+      },
+      {
+        era: "The Multiverse & Modern Streaming Era (2020–2026)",
+        items: [
+          { title: "Marvel Battleworld: Mystery of the Thanostones", meta: "2020 Animated Shorts", platform: "Disney+ UK" },
+          { title: "The New Mutants", meta: "2020 Film", platform: "Disney+ UK" },
+          { title: "Helstrom", meta: "2020 Series", platform: "Disney+ UK" },
+          { title: "Marvel’s 616", meta: "2020 Documentary Series", platform: "Disney+ UK" },
+          { title: "Marvel Studios: Legends", meta: "2021 Documentary Series", platform: "Disney+ UK" },
+          { title: "WandaVision", meta: "2021 MCU Series", platform: "Disney+ UK" },
+          { title: "Marvel Studios: Assembled", meta: "2021 Documentary Series", platform: "Disney+ UK" },
+          { title: "The Falcon and the Winter Soldier", meta: "2021 MCU Series", platform: "Disney+ UK" },
+          { title: "M.O.D.O.K.", meta: "2021 Animated Series", platform: "Disney+ UK" },
+          { title: "Loki", meta: "2021 MCU Series", platform: "Disney+ UK" },
+          { title: "Black Widow", meta: "2021 MCU Film", platform: "Disney+ UK" },
+          { title: "Spidey and His Amazing Friends", meta: "2021 Animated Series", platform: "Disney+ UK" },
+          { title: "What If...?", meta: "2021 MCU Animated Series", platform: "Disney+ UK" },
+          { title: "Shang-Chi and the Legend of the Ten Rings", meta: "2021 MCU Film", platform: "Disney+ UK" },
+          { title: "Venom: Let There Be Carnage", meta: "2021 Sony Film", platform: "Netflix UK" },
+          { title: "Eternals", meta: "2021 MCU Film", platform: "Disney+ UK" },
+          { title: "Hit-Monkey", meta: "2021 Animated Series", platform: "Disney+ UK" },
+          { title: "Hawkeye", meta: "2021 MCU Series", platform: "Disney+ UK" },
+          { title: "Spider-Man: No Way Home", meta: "2021 MCU Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Moon Knight", meta: "2022 MCU Series", platform: "Disney+ UK" },
+          { title: "Doctor Strange in the Multiverse of Madness", meta: "2022 MCU Film", platform: "Disney+ UK" },
+          { title: "Ms. Marvel", meta: "2022 MCU Series", platform: "Disney+ UK" },
+          { title: "Thor: Love and Thunder", meta: "2022 MCU Film", platform: "Disney+ UK" },
+          { title: "I Am Groot", meta: "2022 MCU Shorts", platform: "Disney+ UK" },
+          { title: "She-Hulk: Attorney at Law", meta: "2022 MCU Series", platform: "Disney+ UK" },
+          { title: "Werewolf by Night", meta: "2022 MCU Special Presentation", platform: "Disney+ UK" },
+          { title: "Black Panther: Wakanda Forever", meta: "2022 MCU Film", platform: "Disney+ UK" },
+          { title: "The Guardians of the Galaxy Holiday Special", meta: "2022 MCU Special Presentation", platform: "Disney+ UK" },
+          { title: "Moon Girl and Devil Dinosaur", meta: "2023 Animated Series", platform: "Disney+ UK" },
+          { title: "Ant-Man and the Wasp: Quantumania", meta: "2023 MCU Film", platform: "Disney+ UK" },
+          { title: "Guardians of the Galaxy Vol. 3", meta: "2023 MCU Film", platform: "Disney+ UK" },
+          { title: "Spider-Man: Across the Spider-Verse", meta: "2023 Animated Film", platform: "Netflix UK" },
+          { title: "Secret Invasion", meta: "2023 MCU Series", platform: "Disney+ UK" },
+          { title: "Werewolf by Night in Color", meta: "2023 MCU Special Presentation", platform: "Disney+ UK" },
+          { title: "LEGO Marvel Avengers: Code Red", meta: "2023 Animated Special", platform: "Disney+ UK" },
+          { title: "The Marvels", meta: "2023 MCU Film", platform: "Disney+ UK" },
+          { title: "Echo", meta: "2024 MCU Series", platform: "Disney+ UK" },
+          { title: "Madame Web", meta: "2024 Sony Film", platform: "Netflix UK" },
+          { title: "X-Men '97", meta: "2024 Animated Series", platform: "Disney+ UK" },
+          { title: "Deadpool & Wolverine", meta: "2024 MCU Film", platform: "Disney+ UK" },
+          { title: "Agatha All Along", meta: "2024 MCU Series", platform: "Disney+ UK" },
+          { title: "LEGO Marvel Avengers: Mission Demolition", meta: "2024 Animated Special", platform: "Disney+ UK" },
+          { title: "Venom: The Last Dance", meta: "2024 Sony Film", platform: "Netflix UK" },
+          { title: "Kraven the Hunter", meta: "2024 Sony Film", platform: "Disney+ UK / Netflix UK" },
+          { title: "Your Friendly Neighborhood Spider-Man", meta: "2025 MCU Animated Series", platform: "Disney+ UK" },
+          { title: "Captain America: Brave New World", meta: "2025 MCU Film", platform: "Disney+ UK" },
+          { title: "Daredevil: Born Again", meta: "2025 MCU Series", platform: "Disney+ UK" },
+          { title: "Thunderbolts*", meta: "2025 MCU Film", platform: "Disney+ UK" },
+          { title: "Ironheart", meta: "2025 MCU Series", platform: "Disney+ UK" },
+          { title: "The Fantastic Four: First Steps", meta: "2025 MCU Film", platform: "Disney+ UK" },
+          { title: "Eyes of Wakanda", meta: "2025 MCU Animated Series", platform: "Disney+ UK" },
+          { title: "Iron Man and His Awesome Friends", meta: "2025 Animated Series", platform: "Disney+ UK" },
+          { title: "Spidey and Iron Man: Avengers Team-Up!", meta: "2025 Animated Special", platform: "Disney+ UK" },
+          { title: "Marvel Zombies", meta: "2025 MCU Animated Series", platform: "Disney+ UK" },
+          { title: "LEGO Marvel Avengers: Strange Tails", meta: "2025 Animated Special", platform: "Disney+ UK" },
+          { title: "Wonder Man", meta: "2026 MCU Series", platform: "Disney+ UK" },
+          { title: "The Punisher: One Last Kill", meta: "2026 MCU Special Presentation", platform: "Disney+ UK" },
+          { title: "VisionQuest", meta: "2026 MCU Series", platform: "Disney+ UK" }
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = "uk_marvel_checklist_v2";
+    let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    let currentFilter = "all";
+    let searchQuery = "";
+    let resetConfirmPending = false;
+    let resetTimer = null;
+
+    function getItemId(eraIdx, itemIdx) {
+      return `item_${eraIdx}_${itemIdx}`;
+    }
+
+    function saveProgress() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems));
+      updateStats();
+    }
+
+    function toggleItem(id) {
+      if (checkedItems[id]) {
+        delete checkedItems[id];
+      } else {
+        checkedItems[id] = true;
+      }
+      saveProgress();
+      if (currentFilter === "watched" || currentFilter === "unwatched") {
+        renderList();
+      }
+    }
+
+    function toggleEraAll(eraIdx, check) {
+      const era = marvelData[eraIdx];
+      era.items.forEach((_, itemIdx) => {
+        const id = getItemId(eraIdx, itemIdx);
+        if (check) {
+          checkedItems[id] = true;
+        } else {
+          delete checkedItems[id];
+        }
+      });
+      saveProgress();
+      renderList();
+    }
+
+    function handleResetClick() {
+      const btn = document.getElementById("reset-btn");
+      if (!resetConfirmPending) {
+        resetConfirmPending = true;
+        btn.textContent = "Confirm Clear?";
+        btn.classList.remove("bg-gray-800", "text-gray-300");
+        btn.classList.add("bg-red-600", "text-white", "border-red-500");
+        resetTimer = setTimeout(() => {
+          resetConfirmPending = false;
+          btn.textContent = "Reset";
+          btn.classList.remove("bg-red-600", "text-white", "border-red-500");
+          btn.classList.add("bg-gray-800", "text-gray-300");
+        }, 3500);
+      } else {
+        clearTimeout(resetTimer);
+        resetConfirmPending = false;
+        btn.textContent = "Reset";
+        btn.classList.remove("bg-red-600", "text-white", "border-red-500");
+        btn.classList.add("bg-gray-800", "text-gray-300");
+        checkedItems = {};
+        saveProgress();
+        renderList();
+      }
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.classList.remove("bg-red-600", "text-white");
+        btn.classList.add("bg-gray-800", "text-gray-300");
+      });
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      activeBtn.classList.remove("bg-gray-800", "text-gray-300");
+      activeBtn.classList.add("bg-red-600", "text-white");
+      renderList();
+    }
+
+    function updateStats() {
+      let total = 0;
+      let watched = 0;
+      marvelData.forEach((era, eraIdx) => {
+        era.items.forEach((_, itemIdx) => {
+          total++;
+          if (checkedItems[getItemId(eraIdx, itemIdx)]) {
+            watched++;
+          }
+        });
+      });
+      const pct = total > 0 ? Math.round((watched / total) * 100) : 0;
+      document.getElementById("progress-text").textContent = `${watched} / ${total} Watched`;
+      document.getElementById("progress-percent").textContent = `${pct}% Complete`;
+      document.getElementById("progress-bar").style.width = `${pct}%`;
+    }
+
+    function getPlatformBadges(platform) {
+      if (platform === "Disney+ UK / Netflix UK") {
+        return `
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-950 text-blue-300 border border-blue-800/60">Disney+ UK</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-red-950 text-red-300 border border-red-800/60">Netflix UK</span>
+        `;
+      } else if (platform === "Netflix UK") {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-red-950 text-red-300 border border-red-800/60">Netflix UK</span>`;
+      } else {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-950 text-blue-300 border border-blue-800/60">Disney+ UK</span>`;
+      }
+    }
+
+    function renderList() {
+      const container = document.getElementById("checklist-container");
+      container.innerHTML = "";
+      let globalNumber = 0;
+      let anyVisible = false;
+
+      marvelData.forEach((era, eraIdx) => {
+        const eraItems = [];
+        let eraWatchedCount = 0;
+
+        era.items.forEach((item, itemIdx) => {
+          globalNumber++;
+          const id = getItemId(eraIdx, itemIdx);
+          const isChecked = !!checkedItems[id];
+          if (isChecked) eraWatchedCount++;
+
+          // Filtering
+          const matchesSearch =
+            item.title.toLowerCase().includes(searchQuery) ||
+            item.meta.toLowerCase().includes(searchQuery);
+
+          let matchesFilter = true;
+          if (currentFilter === "watched") matchesFilter = isChecked;
+          if (currentFilter === "unwatched") matchesFilter = !isChecked;
+          if (currentFilter === "netflix") matchesFilter = item.platform.includes("Netflix UK");
+          if (currentFilter === "mcu") matchesFilter = item.meta.includes("MCU");
+          if (currentFilter === "specials") {
+            matchesFilter =
+              item.meta.includes("Special") ||
+              item.meta.includes("Short") ||
+              item.meta.includes("Documentary");
+          }
+
+          if (matchesSearch && matchesFilter) {
+            eraItems.push({ ...item, id, isChecked, number: globalNumber });
+          }
+        });
+
+        if (eraItems.length === 0) return;
+        anyVisible = true;
+
+        const allEraChecked = eraWatchedCount === era.items.length;
+
+        const section = document.createElement("section");
+        section.className = "bg-[#131926] border border-gray-800/90 rounded-2xl overflow-hidden shadow-lg";
+
+        section.innerHTML = `
+          <div class="bg-[#182030] px-4 py-3.5 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-white">${era.era}</h2>
+              <p class="text-xs text-gray-400">${eraWatchedCount} of ${era.items.length} completed</p>
+            </div>
+            <button
+              onclick="toggleEraAll(${eraIdx}, ${!allEraChecked})"
+              class="self-start sm:self-auto text-xs font-medium px-3 py-1 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition"
+            >
+              ${allEraChecked ? "Untick Era" : "Tick Entire Era"}
+            </button>
+          </div>
+          <div class="divide-y divide-gray-800/60">
+            ${eraItems.map(item => `
+              <label class="flex items-start sm:items-center gap-3.5 px-4 py-3 hover:bg-gray-800/40 cursor-pointer transition select-none">
+                <input
+                  type="checkbox"
+                  class="checkbox-custom mt-1 sm:mt-0 w-5 h-5 rounded border-gray-600 bg-gray-900 text-red-600 focus:ring-red-500 focus:ring-offset-gray-900 cursor-pointer accent-red-600"
+                  ${item.isChecked ? "checked" : ""}
+                  onchange="toggleItem('${item.id}')"
+                />
+                <div class="item-content flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 transition-opacity">
+                  <div>
+                    <span class="text-xs font-mono text-gray-500 mr-1.5">#${item.number}</span>
+                    <span class="item-title text-sm sm:text-base font-semibold text-gray-100">${item.title}</span>
+                    <span class="block sm:inline text-xs text-gray-400 sm:ml-2">${item.meta}</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5 shrink-0">
+                    ${getPlatformBadges(item.platform)}
+                  </div>
+                </div>
+              </label>
+            `).join("")}
+          </div>
+        `;
+
+        container.appendChild(section);
+      });
+
+      if (!anyVisible) {
+        container.innerHTML = `
+          <div class="text-center py-12 bg-[#131926] border border-gray-800 rounded-2xl">
+            <p class="text-gray-400 text-sm">No Marvel titles match your current search or filter.</p>
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      renderList();
+    });
+
+    // Init
+    updateStats();
+    renderList();
+  </script>
+</body>
+  </html>
